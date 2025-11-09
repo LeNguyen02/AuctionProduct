@@ -6,7 +6,8 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const config = require('./dbconfig');
-const XLSX = require('xlsx'); // ← QUAN TRỌNG: Phải có dòng này
+const XLSX = require('xlsx');
+// ❌ XÓA DÒNG NÀY: const moment = require('moment-timezone');
 
 const app = express();
 app.use(express.json());
@@ -298,103 +299,116 @@ app.get('/api/bid-detail/:id', async (req, res) => {
   }
 });
 
+// ========== HÀM HELPER XỬ LÝ THỜI GIAN VIỆT NAM ==========
+
+// Chuyển đổi Date sang múi giờ Việt Nam (UTC+7)
+function toVietnamTime(date) {
+  if (!(date instanceof Date)) {
+    date = new Date(date);
+  }
+  
+  // Lấy timestamp UTC
+  const utcTime = date.getTime();
+  
+  // Thêm 7 giờ (25200000 milliseconds = 7 * 60 * 60 * 1000)
+  const vietnamTime = new Date(utcTime + (7 * 60 * 60 * 1000));
+  
+  return vietnamTime;
+}
+
+// Format datetime cho SQL Server: YYYY-MM-DD HH:mm:ss
+function formatDateTimeForDB(date) {
+  if (!(date instanceof Date)) {
+    date = new Date(date);
+  }
+  
+  // Chuyển sang giờ Việt Nam
+  const vnDate = toVietnamTime(date);
+  
+  const year = vnDate.getUTCFullYear();
+  const month = String(vnDate.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(vnDate.getUTCDate()).padStart(2, '0');
+  const hours = String(vnDate.getUTCHours()).padStart(2, '0');
+  const minutes = String(vnDate.getUTCMinutes()).padStart(2, '0');
+  const seconds = String(vnDate.getUTCSeconds()).padStart(2, '0');
+  
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
+// ========== CẬP NHẬT API PLACE BID ==========
+
 // API: place bid
 app.post('/api/bid', async (req, res) => {
+  const { maProduct, tenNguoiDauGia, giaHienTai } = req.body;
+  
+  if (!maProduct || !tenNguoiDauGia || !giaHienTai) {
+    return res.json({ success: false, message: 'Thiếu thông tin' });
+  }
+  
   try {
-    const { maProduct, tenNguoiDauGia, giaHienTai } = req.body;
-    const pid = parseInt(maProduct);
-    const bid = parseFloat(giaHienTai);
-    
-    if (!pid || !tenNguoiDauGia || !bid) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Missing fields' 
-      });
-    }
-
-    // Always get pool before using it
     const pool = await getPool();
-
-    // Lấy displayName từ SSO nếu có, lưu vào bảng Users nếu chưa có
-    let username = '';
-    let userId = null;
-    if (req.sso && req.sso.user && req.sso.user.displayName) {
-      username = req.sso.user.displayName;
-      // Lưu vào bảng Users nếu chưa có
-      const userCheck = await pool.request()
-        .input('username', sql.NVarChar, username)
-        .query('SELECT UserID FROM Users WHERE Username = @username');
-      if (!userCheck.recordset.length) {
-        const insertUser = await pool.request()
-          .input('username', sql.NVarChar, username)
-          .query('INSERT INTO Users (Username) OUTPUT INSERTED.UserID VALUES (@username)');
-        userId = insertUser.recordset[0].UserID;
-      } else {
-        userId = userCheck.recordset[0].UserID;
-      }
+    
+    // Kiểm tra sản phẩm tồn tại
+    const checkProduct = await pool.request()
+      .input('maProduct', maProduct)
+      .query('SELECT * FROM Product WHERE MaProduct = @maProduct');
+    
+    if (checkProduct.recordset.length === 0) {
+      return res.json({ success: false, message: 'Sản phẩm không tồn tại' });
     }
     
-    // get current price and start price
-    const r = await pool.request()
-      .input('pid', sql.Int, pid)
-      .query('SELECT GiaHienTai, GiaKhoiDiem FROM Product WHERE MaProduct=@pid');
+    const product = checkProduct.recordset[0];
+    const currentPrice = product.GiaHienTai || product.GiaKhoiDiem;
     
-    if (!r.recordset.length) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Product not found' 
-      });
-    }
-    
-    const row = r.recordset[0];
-    const current = row.GiaHienTai != null ? parseFloat(row.GiaHienTai) : parseFloat(row.GiaKhoiDiem);
-
-    if (bid <= current) {
+    if (giaHienTai <= currentPrice) {
       return res.json({ 
         success: false, 
-        message: 'Bid must be greater than current price' 
+        message: `Giá đấu phải lớn hơn ${Number(currentPrice).toLocaleString()} VNĐ` 
       });
     }
-
-    // insert into Daugia (lưu UserID nếu có)
-    const request = pool.request()
-      .input('pid', sql.Int, pid)
-      .input('tenNguoiDauGia', sql.NVarChar, tenNguoiDauGia)
-      .input('bid', sql.Float, bid);
     
-    if (userId) {
-      request.input('userId', sql.Int, userId);
-      await request.query("INSERT INTO Daugia (MaProduct, TenNguoiDauGia, GiaHienTai, Note, UserID) VALUES (@pid, @tenNguoiDauGia, @bid, N'Đấu giá', @userId)");
-    } else {
-      await request.query("INSERT INTO Daugia (MaProduct, TenNguoiDauGia, GiaHienTai, Note) VALUES (@pid, @tenNguoiDauGia, @bid, N'Đấu giá')");
-    }
-
-    // update product current price and last bidder and append note
-    // get existing note
-    const notesQ = await pool.request()
-      .input('pid', sql.Int, pid)
-      .query('SELECT GhiChu FROM Product WHERE MaProduct=@pid');
+    // ✅ Lấy thời gian hiện tại theo múi giờ Việt Nam
+    const now = new Date();
+    const vietnamTime = formatDateTimeForDB(now);
     
-    let notes = notesQ.recordset.length ? (notesQ.recordset[0].GhiChu || '') : '';
-    const newNote = notes ? (notes + ', ' + tenNguoiDauGia) : tenNguoiDauGia;
+    console.log('Current time (UTC):', now.toISOString());
+    console.log('Vietnam time (UTC+7):', vietnamTime);
     
+    // Cập nhật Product
     await pool.request()
-      .input('bid', sql.Float, bid)
-      .input('tenNguoiDauGia', sql.NVarChar, tenNguoiDauGia)
-      .input('newNote', sql.NVarChar, newNote)
-      .input('pid', sql.Int, pid)
-      .query('UPDATE Product SET GiaHienTai=@bid, TenNguoiDauGia=@tenNguoiDauGia, GhiChu=@newNote WHERE MaProduct=@pid');
-
-    io.emit('productsChanged');
-    res.json({ success: true, message: 'Bid successful' });
+      .input('maProduct', maProduct)
+      .input('giaHienTai', giaHienTai)
+      .input('tenNguoiDauGia', tenNguoiDauGia)
+      .query(`
+        UPDATE Product 
+        SET GiaHienTai = @giaHienTai, 
+            TenNguoiDauGia = @tenNguoiDauGia 
+        WHERE MaProduct = @maProduct
+      `);
     
+    // Thêm vào BidHistory với thời gian Việt Nam
+    await pool.request()
+      .input('maProduct', maProduct)
+      .input('tenNguoiDauGia', tenNguoiDauGia)
+      .input('giaHienTai', giaHienTai)
+      .input('createdAt', vietnamTime)
+      .query(`
+        INSERT INTO BidHistory (MaProduct, TenNguoiDauGia, GiaHienTai, CreatedAt)
+        VALUES (@maProduct, @tenNguoiDauGia, @giaHienTai, @createdAt)
+      `);
+    
+    // Emit socket event
+    io.emit('newBid', { 
+      maProduct, 
+      tenNguoiDauGia, 
+      giaHienTai,
+      createdAt: vietnamTime
+    });
+    
+    res.json({ success: true });
   } catch (err) {
     console.error('Error placing bid:', err);
-    // TRẢ VỀ JSON THAY VÌ TEXT
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error placing bid: ' + err.message 
-    });
+    res.json({ success: false, message: 'Lỗi server: ' + err.message });
   }
 });
 
@@ -475,6 +489,21 @@ app.get('/api/export-excel', async (req, res) => {
       message: 'Lỗi khi xuất file Excel: ' + err.message 
     });
   }
+});
+
+// ========== API TEST THỜI GIAN ==========
+
+// ✅ API test thời gian (để debug)
+app.get('/api/test-time', (req, res) => {
+  const now = new Date();
+  const vietnamTime = formatDateTimeForDB(now);
+  
+  res.json({
+    serverTime: now.toISOString(),
+    serverLocalTime: now.toString(),
+    vietnamTime: vietnamTime,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+  });
 });
 
 // ========== START SERVER ==========
