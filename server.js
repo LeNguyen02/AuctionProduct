@@ -350,12 +350,14 @@ app.post('/api/bid', async (req, res) => {
       });
     }
     
-    // ✅ Lấy thời gian hiện tại theo múi giờ Việt Nam
+    // ✅ Lấy thời gian hiện tại (local time)
     const now = new Date();
     const vietnamTime = formatDateTimeForDB(now);
     
-    console.log('Current time (UTC):', now.toISOString());
-    console.log('Vietnam time (UTC+7):', vietnamTime);
+    console.log('=== BID TIME DEBUG ===');
+    console.log('Current time (local):', now.toString());
+    console.log('Formatted for DB:', vietnamTime);
+    console.log('=====================');
     
     // Cập nhật Product
     await pool.request()

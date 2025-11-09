@@ -273,6 +273,49 @@ document.getElementById('bidOk').onclick = async () => {
   }
 };
 
+// ✅ Hàm format thời gian Việt Nam - FIXED
+function formatVietnameseDateTime(dateStr) {
+  if (!dateStr) return '-';
+  
+  try {
+    // SQL Server trả về: "2025-11-09 21:45:25" (đã là giờ local VN)
+    // Parse trực tiếp từ string thay vì dùng Date() để tránh timezone conversion
+    
+    const parts = dateStr.split(/[\s-:]/); // Split by space, dash, colon
+    if (parts.length >= 6) {
+      // parts: [year, month, day, hour, minute, second]
+      const year = parts[0];
+      const month = parts[1].padStart(2, '0');
+      const day = parts[2].padStart(2, '0');
+      const hours = parts[3].padStart(2, '0');
+      const minutes = parts[4].padStart(2, '0');
+      const seconds = parts[5].padStart(2, '0');
+      
+      return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+    }
+    
+    // Fallback: nếu format khác, parse như cũ
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) {
+      console.error('Invalid date:', dateStr);
+      return dateStr;
+    }
+    
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    
+    return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+  } catch (err) {
+    console.error('Error formatting date:', err, 'Input:', dateStr);
+    return dateStr;
+  }
+}
+
+// Cập nhật hàm openDetail - phần hiển thị lịch sử đấu giá
 function openDetail(e){
   const btn = e.currentTarget;
   const id = btn.dataset.id;
@@ -299,7 +342,6 @@ function openDetail(e){
       return res.json();
     })
     .then(data => {
-      // Đảm bảo luôn set class cho tiêu đề modal
       document.getElementById('modalAuctionTitleText').className = 'modal-auction-title modal-auction-title-black';
       if(!data || !data.product){
         document.getElementById('modalAuctionProductName').textContent = '';
@@ -314,7 +356,8 @@ function openDetail(e){
       }
       const p = data.product;
       document.getElementById('modalAuctionProductName').textContent = p.TenProduct || '';
-      // Hỗ trợ nhiều ảnh, phân tách bằng dấu phẩy nếu có
+      
+      // Hỗ trợ nhiều ảnh
       let imgs = [];
       if (p.HinhAnh && p.HinhAnh.includes(',')) {
         imgs = p.HinhAnh.split(',').map(s => s.trim()).filter(Boolean);
@@ -323,16 +366,17 @@ function openDetail(e){
       } else {
         imgs = ['/uploads/placeholder.png'];
       }
+      
       let currentImg = 0;
       function showImg(idx) {
-  // Hiển thị mô tả nhiều dòng
-  const moTaEl = document.getElementById('detailMoTa');
-  moTaEl.innerHTML = (p.MoTa || '').replace(/\n/g, '<br>');
-  moTaEl.style.fontFamily = document.getElementById('detailTen').style.fontFamily;
-  moTaEl.style.fontSize = document.getElementById('detailTen').style.fontSize;
-  moTaEl.style.fontWeight = document.getElementById('detailTen').style.fontWeight;
-  document.getElementById('detailGiaKhoiDiem').textContent = p.GiaKhoiDiem != null ? Number(p.GiaKhoiDiem).toLocaleString() : '';
-  document.getElementById('detailGiaHienTai').textContent = p.GiaHienTai != null ? Number(p.GiaHienTai).toLocaleString() : '';
+        const moTaEl = document.getElementById('detailMoTa');
+        moTaEl.innerHTML = (p.MoTa || '').replace(/\n/g, '<br>');
+        moTaEl.style.fontFamily = document.getElementById('detailTen').style.fontFamily;
+        moTaEl.style.fontSize = document.getElementById('detailTen').style.fontSize;
+        moTaEl.style.fontWeight = document.getElementById('detailTen').style.fontWeight;
+        document.getElementById('detailGiaKhoiDiem').textContent = p.GiaKhoiDiem != null ? Number(p.GiaKhoiDiem).toLocaleString() : '';
+        document.getElementById('detailGiaHienTai').textContent = p.GiaHienTai != null ? Number(p.GiaHienTai).toLocaleString() : '';
+        
         const imgEl = document.getElementById('detailImg');
         imgEl.onerror = function() {
           this.onerror = null;
@@ -342,11 +386,20 @@ function openDetail(e){
           this.style.display = 'block';
         };
         imgEl.src = imgs[idx] || '/uploads/placeholder.png';
+        
+        // Sự kiện click để phóng to ảnh
+        imgEl.onclick = function() {
+          if (this.src && !this.src.includes('placeholder.png')) {
+            openImageZoom(this.src, imgs, idx);
+          }
+        };
+        
         // highlight thumb
         document.querySelectorAll('#detailImgSlider img').forEach((el,i)=>{
           el.classList.toggle('active',i===idx);
         });
       }
+      
       // render slider
       const slider = document.getElementById('detailImgSlider');
       slider.innerHTML = '';
@@ -359,9 +412,7 @@ function openDetail(e){
       });
       showImg(0);
 
-  document.getElementById('detailTen').textContent = p.TenProduct || '';
-
-  // Đảm bảo luôn hiển thị lại mô tả, giá, tên sản phẩm nếu có
+      document.getElementById('detailTen').textContent = p.TenProduct || '';
 
       const bids = data.bids || [];
       if(bids.length === 0){
@@ -372,7 +423,7 @@ function openDetail(e){
           tr.innerHTML = `
             <td>${d.TenNguoiDauGia || '-'}</td>
             <td>${d.GiaHienTai != null ? Number(d.GiaHienTai).toLocaleString() : '-'}</td>
-            <td>${d.CreatedAt ? new Date(d.CreatedAt).toLocaleString('vi-VN') : '-'}</td>
+            <td>${formatVietnameseDateTime(d.CreatedAt)}</td>
           `;
           tbody.appendChild(tr);
         });
@@ -469,3 +520,204 @@ window.onload = async () => {
   await loadAuctionTime(); // Load thời gian trước
   await loadProducts();     // Sau đó load sản phẩm
 };
+
+// Hàm mở ảnh phóng to
+function openImageZoom(src) {
+  // Tạo overlay
+  const overlay = document.createElement('div');
+  overlay.id = 'imageZoomOverlay';
+  overlay.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    cursor: pointer;
+  `;
+  
+  // Tạo ảnh phóng to
+  const zoomImg = document.createElement('img');
+  zoomImg.src = src;
+  zoomImg.style.cssText = `
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+    cursor: zoom-out;
+  `;
+  
+  // Thêm sự kiện click ra ngoài để đóng
+  overlay.onclick = function(e) {
+    if (e.target === this) {
+      closeImageZoom();
+    }
+  };
+  
+  // Thêm sự kiện ESC để đóng
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeImageZoom();
+    }
+  });
+  
+  // Thêm sự kiện click vào ảnh để đóng
+  zoomImg.onclick = closeImageZoom;
+  
+  overlay.appendChild(zoomImg);
+  document.body.appendChild(overlay);
+}
+
+// Hàm đóng ảnh phóng to
+function closeImageZoom() {
+  const overlay = document.getElementById('imageZoomOverlay');
+  if (overlay) {
+    overlay.remove();
+    document.removeEventListener('keydown', closeImageZoom);
+  }
+}
+
+
+// ========== PHÓNG TO ẢNH VỚI ĐIỀU HƯỚNG ==========
+
+// Biến lưu trữ danh sách ảnh và index hiện tại
+let zoomImages = [];
+let currentZoomIndex = 0;
+
+// Khởi tạo overlay phóng to ảnh
+function initImageZoom() {
+  const overlay = document.getElementById('imageZoomOverlay');
+  const zoomedImage = document.getElementById('zoomedImage');
+  const closeBtn = document.querySelector('.zoom-close');
+  const prevBtn = document.getElementById('zoomPrev');
+  const nextBtn = document.getElementById('zoomNext');
+  const counter = document.getElementById('zoomCounter');
+  
+  if (!overlay || !zoomedImage || !closeBtn || !prevBtn || !nextBtn || !counter) {
+    console.warn('Image zoom elements not found');
+    return;
+  }
+  
+  // Hàm cập nhật hiển thị ảnh
+  function updateZoomImage() {
+    if (zoomImages.length === 0) return;
+    
+    zoomedImage.src = zoomImages[currentZoomIndex];
+    counter.textContent = `${currentZoomIndex + 1} / ${zoomImages.length}`;
+    
+    // Disable/enable nút prev/next
+    prevBtn.disabled = currentZoomIndex === 0;
+    nextBtn.disabled = currentZoomIndex === zoomImages.length - 1;
+    
+    // Ẩn nút nếu chỉ có 1 ảnh
+    if (zoomImages.length <= 1) {
+      prevBtn.style.display = 'none';
+      nextBtn.style.display = 'none';
+      counter.style.display = 'none';
+    } else {
+      prevBtn.style.display = 'block';
+      nextBtn.style.display = 'block';
+      counter.style.display = 'block';
+    }
+  }
+  
+  // Hàm mở overlay phóng to với danh sách ảnh
+  window.openImageZoom = function(imageSrc, allImages = null, startIndex = 0) {
+    // Nếu có danh sách ảnh, sử dụng nó; nếu không, chỉ hiển thị 1 ảnh
+    if (allImages && Array.isArray(allImages) && allImages.length > 0) {
+      zoomImages = allImages.filter(img => img && !img.includes('placeholder.png'));
+    } else {
+      zoomImages = [imageSrc];
+    }
+    
+    // Tìm index của ảnh hiện tại trong danh sách
+    currentZoomIndex = zoomImages.indexOf(imageSrc);
+    if (currentZoomIndex === -1) {
+      currentZoomIndex = startIndex || 0;
+    }
+    
+    updateZoomImage();
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  };
+  
+  // Hàm đóng overlay phóng to
+  function closeImageZoom() {
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+    zoomedImage.src = '';
+    zoomImages = [];
+    currentZoomIndex = 0;
+  }
+  
+  // Hàm chuyển ảnh trước
+  function showPrevImage() {
+    if (currentZoomIndex > 0) {
+      currentZoomIndex--;
+      updateZoomImage();
+    }
+  }
+  
+  // Hàm chuyển ảnh sau
+  function showNextImage() {
+    if (currentZoomIndex < zoomImages.length - 1) {
+      currentZoomIndex++;
+      updateZoomImage();
+    }
+  }
+  
+  // Click vào nút X để đóng
+  closeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    closeImageZoom();
+  });
+  
+  // Click vào nút prev/next
+  prevBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    showPrevImage();
+  });
+  
+  nextBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    showNextImage();
+  });
+  
+  // Click vào ảnh để đóng
+  zoomedImage.addEventListener('click', (e) => {
+    e.stopPropagation();
+    closeImageZoom();
+  });
+  
+  // Click vào overlay (nền tối) để đóng
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      closeImageZoom();
+    }
+  });
+  
+  // Nhấn phím để điều khiển
+  document.addEventListener('keydown', (e) => {
+    if (!overlay.classList.contains('active')) return;
+    
+    switch(e.key) {
+      case 'Escape':
+        closeImageZoom();
+        break;
+      case 'ArrowLeft':
+        showPrevImage();
+        break;
+      case 'ArrowRight':
+        showNextImage();
+        break;
+    }
+  });
+}
+
+// Khởi tạo khi trang load
+document.addEventListener('DOMContentLoaded', () => {
+  initImageZoom();
+});

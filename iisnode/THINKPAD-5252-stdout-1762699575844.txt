@@ -1,0 +1,5 @@
+✅ Server running on http://localhost:\\.\pipe\0b80c06d-ce1e-43d6-b17d-07477aa31c16
+✅ Connected to SQL Server
+Client connected: 1CRc__qsY85x7_0QAAAB
+Client connected: sI7iBzd-fhYpdSGtAAAE
+Client connected: Jnm-z_SMNyfdxA1DAAAF

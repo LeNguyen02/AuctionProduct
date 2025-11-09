@@ -771,3 +771,161 @@ footer p {
   line-height: 1.4;
   margin: 0;
 }
+
+/* Overlay phóng to ảnh */
+.image-zoom-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 10000;
+  justify-content: center;
+  align-items: center;
+  cursor: default;
+}
+
+.image-zoom-overlay.active {
+  display: flex;
+}
+
+.zoomed-image {
+  max-width: 85vw;
+  max-height: 85vh;
+  object-fit: contain;
+  animation: zoomIn 0.3s ease;
+  cursor: zoom-out;
+  user-select: none;
+}
+
+.zoom-close {
+  position: absolute;
+  top: 20px;
+  right: 40px;
+  color: #fff;
+  font-size: 48px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  z-index: 10001;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+}
+
+.zoom-close:hover {
+  color: #ff4444;
+  transform: scale(1.1);
+}
+
+/* Nút điều hướng trái/phải */
+.zoom-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border: none;
+  font-size: 36px;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+  z-index: 10001;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  user-select: none;
+}
+
+.zoom-nav:hover {
+  background: rgba(255, 255, 255, 0.4);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.zoom-nav:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.zoom-prev {
+  left: 30px;
+}
+
+.zoom-next {
+  right: 30px;
+}
+
+.zoom-nav:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Bộ đếm ảnh */
+.zoom-counter {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 16px;
+  font-weight: 600;
+  z-index: 10001;
+  backdrop-filter: blur(10px);
+  user-select: none;
+}
+
+@keyframes zoomIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Thêm cursor pointer cho ảnh chính để biết có thể click */
+#detailImg {
+  cursor: zoom-in;
+  transition: transform 0.2s;
+}
+
+#detailImg:hover {
+  transform: scale(1.02);
+}
+
+/* Responsive cho mobile */
+@media (max-width: 768px) {
+  .zoom-close {
+    top: 10px;
+    right: 15px;
+    font-size: 36px;
+  }
+  
+  .zoom-nav {
+    font-size: 28px;
+    padding: 12px 16px;
+  }
+  
+  .zoom-prev {
+    left: 10px;
+  }
+  
+  .zoom-next {
+    right: 10px;
+  }
+  
+  .zoom-counter {
+    bottom: 15px;
+    font-size: 14px;
+    padding: 6px 16px;
+  }
+  
+  .zoomed-image {
+    max-width: 90vw;
+    max-height: 80vh;
+  }
+}

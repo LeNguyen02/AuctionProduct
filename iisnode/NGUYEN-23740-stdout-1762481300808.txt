@@ -1,2 +1,0 @@
-Server running on http://localhost:\\.\pipe\4d05186c-f56d-4b54-a0e0-f5f8c1daca81 (LAN)
-✅ Connected to SQL Server

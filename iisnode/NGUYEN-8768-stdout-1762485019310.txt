@@ -1,3 +1,0 @@
-Server running on http://localhost:\\.\pipe\b5631f22-7feb-41e9-89a7-a5bb0d8e1648 (LAN)
-✅ Connected to SQL Server
-Client connected: 9tQo6j9daxjDYOXBAAAB
