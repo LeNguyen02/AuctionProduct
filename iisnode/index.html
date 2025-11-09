@@ -1,0 +1,87 @@
+<html>
+<head>
+    <title>iisnode logs</title>
+    <style type="text/css">
+        body
+        {
+            font-family: "Trebuchet MS" , Arial, Helvetica, sans-serif;
+        }
+        table
+        {
+            border-collapse: collapse;
+        }
+        td, th
+        {
+            border: 1px solid lightgray;
+            padding: 3px 7px 2px 7px;
+        }
+        th
+        {
+            text-align: left;
+            padding-top: 5px;
+            padding-bottom: 4px;
+            background-color: Gray;
+            color: #ffffff;
+        }
+        td.stderr
+        {
+            color: Red;
+        }
+    </style>
+</head>
+<body>
+    <table id="logFilesTable">
+        <tr>
+            <th>
+                Computer name
+            </th>
+            <th>
+                PID
+            </th>
+            <th>
+                Type
+            </th>
+            <th>
+                Created
+            </th>
+            <th>
+                Link
+            </th>
+        </tr>
+    </table>
+    <p id="lastUpdated"></p>
+    <script type="text/javascript">
+
+        // this is replaced with actual data at runtime by code in interceptor.js
+        var logFiles = [{"file":"NGUYEN-10224-stderr-1762251501905.txt","computername":"NGUYEN","pid":10224,"type":"stderr","created":1762251501905},{"file":"NGUYEN-10764-stderr-1762251335135.txt","computername":"NGUYEN","pid":10764,"type":"stderr","created":1762251335135},{"file":"NGUYEN-12120-stderr-1762251346434.txt","computername":"NGUYEN","pid":12120,"type":"stderr","created":1762251346434},{"file":"NGUYEN-12228-stderr-1762251329126.txt","computername":"NGUYEN","pid":12228,"type":"stderr","created":1762251329126},{"file":"NGUYEN-13512-stderr-1762422901015.txt","computername":"NGUYEN","pid":13512,"type":"stderr","created":1762422901015},{"file":"NGUYEN-14756-stderr-1762325548126.txt","computername":"NGUYEN","pid":14756,"type":"stderr","created":1762325548126},{"file":"NGUYEN-17056-stderr-1762251341113.txt","computername":"NGUYEN","pid":17056,"type":"stderr","created":1762251341113},{"file":"NGUYEN-17400-stderr-1762251326121.txt","computername":"NGUYEN","pid":17400,"type":"stderr","created":1762251326121},{"file":"NGUYEN-204-stderr-1762422897071.txt","computername":"NGUYEN","pid":204,"type":"stderr","created":1762422897071},{"file":"NGUYEN-21968-stderr-1762422896943.txt","computername":"NGUYEN","pid":21968,"type":"stderr","created":1762422896943},{"file":"NGUYEN-23740-stderr-1762481300811.txt","computername":"NGUYEN","pid":23740,"type":"stderr","created":1762481300811},{"file":"NGUYEN-23740-stdout-1762481300808.txt","computername":"NGUYEN","pid":23740,"type":"stdout","created":1762481300808},{"file":"NGUYEN-2576-stderr-1762422900746.txt","computername":"NGUYEN","pid":2576,"type":"stderr","created":1762422900746},{"file":"NGUYEN-3360-stderr-1762325611986.txt","computername":"NGUYEN","pid":3360,"type":"stderr","created":1762325611986},{"file":"NGUYEN-3748-stderr-1762251323140.txt","computername":"NGUYEN","pid":3748,"type":"stderr","created":1762251323140},{"file":"NGUYEN-3876-stderr-1762251348500.txt","computername":"NGUYEN","pid":3876,"type":"stderr","created":1762251348500},{"file":"NGUYEN-7880-stderr-1762325548432.txt","computername":"NGUYEN","pid":7880,"type":"stderr","created":1762325548432},{"file":"NGUYEN-8688-stderr-1762325536460.txt","computername":"NGUYEN","pid":8688,"type":"stderr","created":1762325536460},{"file":"NGUYEN-8768-stderr-1762485019316.txt","computername":"NGUYEN","pid":8768,"type":"stderr","created":1762485019316},{"file":"NGUYEN-8768-stdout-1762485019310.txt","computername":"NGUYEN","pid":8768,"type":"stdout","created":1762485019310},{"file":"NGUYEN-8828-stderr-1762325535999.txt","computername":"NGUYEN","pid":8828,"type":"stderr","created":1762325535999},{"file":"NGUYEN-9892-stderr-1762325611323.txt","computername":"NGUYEN","pid":9892,"type":"stderr","created":1762325611323}];
+        var lastUpdated = 1762485020596;
+        var date = new Date();
+
+        date.setTime(lastUpdated);
+        document.getElementById('lastUpdated').innerHTML = 'Index was last updated ' + date;
+
+        logFiles.sort(function (a, b) {
+            return b.created - a.created;
+        });
+
+        var logFilesTable = document.getElementById("logFilesTable");
+        for (var i = 0; i < logFiles.length; i++) {
+            var logFile = logFiles[i];
+            date.setTime(logFile.created);
+            var row = logFilesTable.insertRow(-1);
+            var computerNameCell = row.insertCell(0);
+            var pidCell = row.insertCell(1);
+            var typeCell = row.insertCell(2);
+            var dateCell = row.insertCell(3);
+            var logCell = row.insertCell(4);
+            computerNameCell.innerHTML = logFile.computername;
+            pidCell.innerHTML = logFile.pid.toString();
+            typeCell.innerHTML = logFile.type;
+            typeCell.setAttribute('class', logFile.type);
+            dateCell.innerHTML = date.toString();
+            logCell.innerHTML = '<a href="' + logFile.file + '">log</a>';
+        };
+
+    </script>
+</body>
+</html>

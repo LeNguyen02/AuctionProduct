@@ -1,0 +1,25 @@
+{
+  "name": "auctionproduct",
+  "version": "1.0.0",
+  "main": "server.js",
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "mssql": "^10.0.4",
+    "multer": "^1.4.5-lts.1",
+    "node-expose-sspi": "^0.1.60",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
+    "uuid": "^13.0.0",
+    "xlsx": "^0.18.5"
+  },
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

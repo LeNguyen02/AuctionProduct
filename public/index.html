@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <title>Đấu giá sản phẩm | E.SUN BANK Đồng Nai</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="script.js"></script>
+  <style>
+    /* Countdown Timer Styles */
+    .countdown-timer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.5em;
+      font-weight: bold;
+      margin: 18px 0 10px 0;
+      color: #d32f2f;
+      letter-spacing: 2px;
+      user-select: none;
+      background: linear-gradient(90deg, #fffbe7 60%, #ffe0e0 100%);
+      border-radius: 12px;
+      box-shadow: 0 2px 12px #0002;
+      padding: 8px 18px;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .countdown-segment {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 48px;
+    }
+    .countdown-number {
+      font-size: 2.1em;
+      background: #fffbe7;
+      border-radius: 8px;
+      padding: 2px 10px;
+      box-shadow: 0 1px 4px #0001;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      animation: flip 1s linear infinite;
+    }
+    .countdown-label {
+      font-size: 0.7em;
+      color: #555;
+      margin-top: 2px;
+    }
+    @keyframes flip {
+      0% { transform: rotateX(0deg);}
+      80% { transform: rotateX(0deg);}
+      85% { transform: rotateX(20deg);}
+      95% { transform: rotateX(-10deg);}
+      100% { transform: rotateX(0deg);}
+    }
+    .countdown-ended {
+      color: #888 !important;
+      background: #eee !important;
+      animation: none !important;
+      box-shadow: none !important;
+    }
+    /* Hiệu ứng rung khi còn dưới 10 giây */
+    .countdown-number.countdown-urgent {
+      color: #fff;
+      background: #d32f2f;
+      animation: shake 0.5s linear infinite, flip 1s linear infinite;
+      box-shadow: 0 0 12px #d32f2f55;
+    }
+    @keyframes shake {
+      0% { transform: translateX(0);}
+      20% { transform: translateX(-2px);}
+      40% { transform: translateX(2px);}
+      60% { transform: translateX(-2px);}
+      80% { transform: translateX(2px);}
+      100% { transform: translateX(0);}
+    }
+    /* Responsive */
+    @media (max-width: 600px) {
+      .countdown-timer {
+        font-size: 1em;
+        padding: 4px 4vw;
+        gap: 6px;
+      }
+      .countdown-number {
+        font-size: 1.2em;
+        padding: 2px 6px;
+      }
+      .countdown-segment {
+        min-width: 30px;
+      }
+    }
+    .disabled-bid-btn {
+  opacity: 0.5 !important;
+  pointer-events: none !important;
+  cursor: not-allowed !important;
+}
+  </style>
+</head>
+<script language="JavaScript" src="icon/ovuongquay.js" type="text/javascript"></script>
+<body>
+<header>
+  <div class="header-content">
+    <h1 style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+    <img src="icon/date-24.png" alt="icon đầu" style="height: 40px;">
+    MEGA LIVE RỰC CHÁY
+    <img src="icon/citad-logo.png" alt="icon cuối" style="height: 40px;">
+    </h1>
+    <p>🌸 PHIÊN ĐẤU GIÁ SẢN PHẨM - GÓP QUỸ TỪ THIỆN 🌸</p>
+  <span id="totalPrice"></span>
+  </div>
+</header> 
+
+  <!-- Countdown Timer -->
+  <div id="countdownTimer" class="countdown-timer" style="display:none;">
+    <div class="countdown-segment">
+      <span class="countdown-number" id="cdDays">00</span>
+      <span class="countdown-label">Ngày</span>
+    </div>
+    <span>:</span>
+    <div class="countdown-segment">
+      <span class="countdown-number" id="cdHours">00</span>
+      <span class="countdown-label">Giờ</span>
+    </div>
+    <span>:</span>
+    <div class="countdown-segment">
+      <span class="countdown-number" id="cdMinutes">00</span>
+      <span class="countdown-label">Phút</span>
+    </div>
+    <span>:</span>
+    <div class="countdown-segment">
+      <span class="countdown-number" id="cdSeconds">00</span>
+      <span class="countdown-label">Giây</span>
+    </div>
+  </div>
+
+  <!-- 🏷️ MAIN -->
+  <main>
+    <section id="products"></section>
+  </main>
+
+  <!-- 💬 BID MODAL -->
+  <div id="bidModal" class="modal" style="display:none;">
+    <div class="modal-body">
+      <h2 id="modalTitle">Đấu giá</h2>
+      <label>Tên:</label><input id="bidName" type="text"><br>
+      <label>Số tiền:</label><input id="bidAmount" type="number"><br>
+      <div class="modal-buttons">
+        <button id="bidOk">OK</button>
+        <button id="bidCancel">Hủy</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📜 DETAIL MODAL -->
+  <div id="detailModal" class="modal" style="display:none;">
+    <div class="modal-body detail-modal-body">
+      <button id="detailClose" class="detail-close-btn">Đóng</button>
+  <h2 class="modal-auction-title modal-auction-title-black" id="modalAuctionTitleText" style="margin-left:10px;">Chi tiết đấu giá: <span id="modalAuctionProductName"></span></h2>
+      <div class="detail-flexbox-fix">
+        <div class="detail-imgbox-fix">
+          <div class="detail-ten-fix" id="detailTen" style="font-size:1.08em; font-weight:600; color:#1a237e; margin-bottom:6px; text-align:center;"></div>
+          <img id="detailImg" src="" alt="Hình sản phẩm">
+          <div class="detail-img-slider" id="detailImgSlider"></div>
+        </div>
+        <div class="detail-infoarea-fix">
+          <div class="detail-mota-fix" id="detailMoTa" style="font-size:1.08em; color:#2a7c2a; font-weight:500; margin-bottom:10px;"></div>
+          <div class="detail-gia-fix">
+            <span>Giá khởi điểm: <b id="detailGiaKhoiDiem"></b></span><br>
+            <span>Giá hiện tại: <b id="detailGiaHienTai"></b></span>
+          </div>
+          <div class="detail-bidlist-fix detail-bidlist-large">
+            <table id="detailTable">
+              <thead>
+                <tr>
+                  <th>Tên người đấu giá</th>
+                  <th>Giá đấu</th>
+                  <th>Thời gian</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+    
+<footer>
+  <img src="icon/footer_logo.png" alt="Logo" class="footer-logo">
+  <p>
+    Address: R101, R209 Amata Trade Center, Long Binh Ward, Dong Nai Province, Viet Nam.<br>
+    Tel: (+84) 251.367 1313 - Fax: (+84) 251.3936.317 - Swiftcode: ESUNVNVX<br>
+    Designed by IT Team Dong Nai - &copy; <span id="currentYear"></span>
+  </p>
+</footer>
+
+<script>
+  // Hiển thị năm hiện tại tự động
+  document.getElementById("currentYear").textContent = new Date().getFullYear();
+</script>
+
+  <!-- 🕒 SCRIPT HIỂN THỊ GIỜ (Chỉ chạy nếu có phần tử clock) -->
+  <script>
+    function updateClock() {
+      const clockEl = document.getElementById('clock');
+      if (!clockEl) return;
+      const now = new Date();
+      const options = { 
+        weekday: 'long', year: 'numeric', month: '2-digit', 
+        day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' 
+      };
+      clockEl.textContent = now.toLocaleString('vi-VN', options);
+    }
+    if (document.getElementById('clock')) {
+      setInterval(updateClock, 1000);
+      updateClock();
+    }
+  </script>
+
+</body>
+</html>

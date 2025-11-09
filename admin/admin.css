@@ -1,0 +1,508 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 20px;
+}
+
+header {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+header h1 {
+  color: #333;
+  font-size: 2em;
+}
+
+main {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+section {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 25px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+section h2 {
+  color: #333;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #667eea;
+}
+
+/* Time Settings */
+.time-settings {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.time-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.form-group input {
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  font-size: 1em;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.current-time-display {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+}
+
+.current-time-display p {
+  margin: 8px 0;
+  color: #555;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.9em;
+}
+
+.status-active {
+  background: #4caf50;
+  color: white;
+}
+
+.status-ended {
+  background: #f44336;
+  color: white;
+}
+
+.status-upcoming {
+  background: #ff9800;
+  color: white;
+}
+
+/* Buttons */
+.btn-primary, .btn-secondary {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #5a6268;
+}
+
+/* Form styles */
+.add-product form {
+  display: grid;
+  gap: 15px;
+}
+
+.add-product label {
+  font-weight: 600;
+  color: #333;
+}
+
+.add-product input,
+.add-product textarea {
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  font-size: 1em;
+  font-family: inherit;
+}
+
+.add-product input:focus,
+.add-product textarea:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+/* Table styles */
+.table-wrapper {
+  overflow-x: auto;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table thead {
+  background: #667eea;
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+table th,
+table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+table tbody tr:hover {
+  background: #f5f5f5;
+}
+
+table img {
+  max-width: 80px;
+  max-height: 60px;
+  border-radius: 5px;
+  object-fit: cover;
+}
+
+table button {
+  padding: 6px 12px;
+  margin: 2px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: all 0.2s;
+}
+
+table button.edit-btn {
+  background: #2196F3;
+  color: white;
+}
+
+table button.edit-btn:hover {
+  background: #1976D2;
+}
+
+table button.delete-btn {
+  background: #f44336;
+  color: white;
+}
+
+table button.delete-btn:hover {
+  background: #d32f2f;
+}
+
+/* Modal styles */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-body {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-body.detail-modal-body {
+  max-width: 1000px;
+}
+
+.detail-close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: #dc3545;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  font-weight: 600;
+}
+
+.detail-close-btn:hover {
+  background: #c82333;
+}
+
+.modal-auction-title-black {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 1.3em;
+}
+
+.detail-flexbox-fix {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.detail-imgbox-fix {
+  flex: 1;
+  min-width: 300px;
+}
+
+.detail-imgbox-fix img#editImg {
+  width: 100%;
+  max-height: 400px;
+  object-fit: contain;
+  border-radius: 8px;
+  border: 2px solid #e0e0e0;
+  margin-bottom: 15px;
+}
+
+.detail-img-slider {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.detail-img-slider img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 2px solid #e0e0e0;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.detail-img-slider img:hover {
+  border-color: #667eea;
+  transform: scale(1.05);
+}
+
+.detail-img-slider img.active {
+  border-color: #667eea;
+  box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+}
+
+.detail-infoarea-fix {
+  flex: 1;
+  min-width: 300px;
+}
+
+.detail-ten-fix {
+  font-size: 1.3em;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+#formEdit {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+#formEdit label {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+#formEdit input,
+#formEdit textarea {
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  font-size: 1em;
+  font-family: inherit;
+}
+
+#formEdit input:focus,
+#formEdit textarea:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+#formEdit button[type="submit"] {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+#formEdit button[type="submit"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Edit Modal Specific Styles */
+#editModal #formEdit label {
+  display: block;
+  margin-top: 15px;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #333;
+}
+
+#editModal #formEdit input[type="number"],
+#editModal #formEdit input[type="text"],
+#editModal #formEdit textarea {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+#editModal #formEdit input[type="number"]:focus,
+#editModal #formEdit input[type="text"]:focus,
+#editModal #formEdit textarea:focus {
+  border-color: #4CAF50;
+  outline: none;
+}
+
+#editModal #formEdit input[type="number"]::placeholder,
+#editModal #formEdit input[type="text"]::placeholder {
+  color: #999;
+  font-style: italic;
+}
+
+/* Highlight cho trường giá hiện tại */
+#editGiaHienTai {
+  background-color: #fff3cd;
+  border-color: #ffc107 !important;
+}
+
+#editGiaHienTai:focus {
+  background-color: #fff;
+  border-color: #ff9800 !important;
+}
+
+/* Export buttons */
+.export-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(40, 167, 69, 0.3);
+}
+
+.btn-success:hover {
+  background: linear-gradient(135deg, #20c997, #28a745);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(40, 167, 69, 0.4);
+}
+
+.btn-success:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  header h1 {
+    font-size: 1.5em;
+  }
+  
+  .time-form {
+    grid-template-columns: 1fr;
+  }
+  
+  .detail-flexbox-fix {
+    flex-direction: column;
+  }
+  
+  table {
+    font-size: 0.9em;
+  }
+  
+  table th,
+  table td {
+    padding: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 10px;
+  }
+  
+  section {
+    padding: 15px;
+  }
+  
+  .btn-primary,
+  .btn-secondary {
+    padding: 10px 20px;
+    font-size: 0.9em;
+  }
+}

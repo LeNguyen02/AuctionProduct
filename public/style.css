@@ -1,0 +1,773 @@
+/* Input trong modal-body (đấu giá) to, dễ nhập */
+.modal-body input[type="text"],
+.modal-body input[type="number"] {
+  width: 100%;
+  font-size: 1.18em;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1.5px solid #b785ff;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+.modal-body input[type="text"]:focus,
+.modal-body input[type="number"]:focus {
+  border-color: #a4508b;
+  outline: none;
+}
+/* Danh sách sản phẩm (admin) cuộn chuột với chiều cao tối đa */
+#tbl {
+  display: block;
+  max-height: 420px;
+  overflow-y: auto;
+  width: 100%;
+  border-collapse: collapse;
+}
+#tbl tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+#tbl th, #tbl td {
+  word-break: break-word;
+  white-space: pre-line;
+  padding: 6px 8px;
+}
+/* Ẩn tên sản phẩm trong modal chỉnh sửa (Admin) nhưng không xóa khỏi DOM */
+#editModal #editTen {
+  display: none !important;
+}
+/* Hiển thị nút OK và Hủy nằm cạnh nhau trong modal-body */
+.modal-body .modal-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  margin-top: 10px;
+}
+/* ==== NÚT TRONG MODAL BODY (OK, Hủy) ==== */
+.modal-body button {
+  padding: 8px 18px;
+  border-radius: 50px;
+  border: none;
+  background: linear-gradient(145deg, #ff6b6b, #ff4b4b);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #c0392b, 0 8px 18px rgba(0,0,0,0.18);
+  transition: background 0.3s, transform 0.15s, box-shadow 0.25s, filter 0.25s;
+  font-size: 1em;
+  margin: 0 8px 0 0;
+}
+.modal-body button:hover {
+  background: linear-gradient(145deg, #a4508b, #5f0a87);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 0 #4b006e, 0 10px 20px rgba(0,0,0,0.22);
+}
+.modal-body button:active {
+  background: linear-gradient(145deg, #00c9ff, #92fe9d);
+  transform: translateY(2px) scale(0.96);
+  box-shadow: 0 3px 0 #00b894, 0 6px 12px rgba(0,0,0,0.18);
+  filter: brightness(1.1);
+}
+/* 💰 Tổng Giá Hiện Tại (Total Price) */
+#totalPrice {
+  display: inline-block;
+  background: linear-gradient(135deg, #ffd700, #ffed4e);
+  color: #000;
+  padding: 15px 30px;
+  border-radius: 50px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  box-shadow: 0 8px 20px rgba(255, 215, 0, 0.5);
+  animation: pulseGlow 2s ease-in-out infinite;
+  margin-top: 10px;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 8px 20px rgba(255, 215, 0, 0.5);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 12px 30px rgba(255, 215, 0, 0.8);
+    transform: scale(1.05);
+  }
+}
+/* 🎨 RESET CƠ BẢN */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* NỀN BODY GRADIENT XANH → LAM */
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: linear-gradient(135deg, #BADFDB, #9B5DE0);
+  background-size: 400% 400%;
+  animation: bgFlow 20s ease infinite;
+  padding: 20px;
+  color: #333;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Animation cho nền chuyển động nhẹ */
+@keyframes bgFlow {
+  0% {background-position: 0% 50%;}
+  50% {background-position: 100% 50%;}
+  100% {background-position: 0% 50%;}
+}
+
+/* ----------- PHẦN MODAL CHI TIẾT ĐẤU GIÁ ----------- */
+#detailTen {
+  display: none;
+}
+.detail-bidlist-large {
+  width: 100%;
+  max-width: 700px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  height: 350px;
+  overflow-y: auto;
+}
+.modal-auction-title-black {
+  color: #111;
+  background: none;
+  -webkit-background-clip: initial;
+  -webkit-text-fill-color: initial;
+  background-clip: initial;
+  text-fill-color: initial;
+  text-shadow: none;
+  text-align: left;
+  margin-bottom: 18px;
+  font-size: 2.2em;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.modal-body.detail-modal-body {
+  margin: auto;
+  position: relative;
+  /* Các thuộc tính khác giữ nguyên */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 1000px;
+  max-width: 99vw;
+  min-height: 600px;
+  padding: 32px 32px 24px 32px;
+  /* position: center; */
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.13);
+}
+.detail-close-btn {
+  position: absolute;
+  top: 18px;
+  right: 24px;
+  min-width: 90px;
+  font-size: 1.05em;
+  z-index: 10;
+  background: #ff6b6b;
+  color: #fff;
+  border: none;
+  border-radius: 18px;
+  padding: 6px 18px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.detail-close-btn:hover {
+  background: #e74c3c;
+}
+.detail-flexbox-fix {
+  display: flex;
+  flex-direction: row;
+  gap: 32px;
+  align-items: flex-start;
+  margin-top: 18px;
+}
+.detail-imgbox-fix {
+  width: 420px;
+  min-width: 320px;
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.13);
+  border: 2.5px solid #e0e0e0;
+  padding: 18px 12px 18px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
+  margin-bottom: 0;
+}
+.detail-imgbox-fix .detail-img-verticals {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.detail-imgbox-fix .detail-img-verticals img {
+  width: 90px;
+  height: 90px;
+  border-radius: 16px;
+  object-fit: cover;
+  border: 2px solid #e0e0e0;
+  background: #fafafa;
+  margin-bottom: 0;
+}
+.detail-imgbox-fix img#detailImg {
+  display: block;
+  margin: 0 auto;
+  width: 350px;
+  height: 320px;
+  border-radius: 18px;
+  object-fit: contain;
+  background: #fff;
+  border: none; /* Bỏ border */
+  box-shadow: 0 2px 8px #e0e0e0;
+}
+.detail-img-slider {
+  display: flex;
+  gap: 12px;
+  margin: 18px auto 0 auto;
+  justify-content: center;
+  width: 100%;
+  padding: 0 10px;
+}
+.detail-img-slider img {
+  width: 82px;
+  height: 82px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 2px solid #ccc;
+  cursor: pointer;
+  background: #fff;
+  transition: border 0.2s;
+}
+.detail-img-slider img.active {
+  border: 2.5px solid #2a7c2a;
+}
+.detail-infoarea-fix {
+  flex: 1;
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: flex-start;
+}
+.detail-ten-fix {
+  font-size: 1.45em;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+.detail-mota-fix {
+  font-size: 1.13em;
+  font-weight: bold;
+  color: #2a7c2a;
+  margin-bottom: 10px;
+}
+.detail-gia-fix {
+  font-size: 1.13em;
+  margin-bottom: 10px;
+}
+.detail-bidlist-fix {
+  margin-top: 18px;
+  max-height: 160px;
+  overflow-y: auto;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  background: #fafbfc;
+  width: 100%;
+}
+.detail-bidlist-fix table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1em;
+  min-height: 200px;
+}
+.detail-bidlist-fix th, .detail-bidlist-fix td {
+  padding: 6px 8px;
+  border: 1px solid #e0e0e0;
+  text-align: center;
+}
+
+/* Giữ lại các style khác phía dưới như cũ... */
+header {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  background: transparent;
+  text-align: center;
+  overflow: hidden;
+  position: relative;
+
+  /* ✅ Thêm khoảng cách giữa header và main */
+  margin-bottom: 30px; /* bạn có thể tăng giảm số px */
+  padding: 20px 0;     /* thêm padding cho header “thở” */
+}
+
+/* 🏆 <h1> 3D cực mạnh, gradient sống động */
+header h1 {
+  font-size: 3.5em;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  text-align: center;
+  color: #FCB53B;
+	
+  /* Gradient nhiều màu */
+  background: linear-gradient(
+    90deg,
+    #ff0000, #ff4500, #ff7f00, #ffa500, #ffffff
+  );
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  /* Animation gradient */
+  animation: textGradientFlow 6s linear infinite;
+
+  /* Text-shadow 3D mạnh */
+  /*
+  text-shadow:
+    2px 2px 0 #800000,
+    4px 4px 0 #550055,
+    6px 6px 6px rgba(0,0,0,0.5),
+    0 0 12px rgba(255,255,255,0.6),
+    0 0 25px rgba(255,0,255,0.4);
+  */
+}
+
+
+/* 🌟 <p> nổi bật, 3D rõ nét, glow nhẹ */
+header p {
+  font-size: 1.7em;
+  font-weight: 700;
+  margin-top: 12px;
+  color: #fff;
+  text-align: center;
+
+  /* Text-shadow 3D nhiều lớp */
+  text-shadow:
+    1px 1px 0 #550055,
+    2px 2px 0 #800080,
+    3px 3px 0 #ff00ff,
+    4px 4px 6px rgba(0,0,0,0.5),
+    0 0 10px rgba(255,255,255,0.6),
+    0 0 20px rgba(200,200,255,0.4);
+
+  /* Animation glow nhẹ */
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+/* 💡 Glow pulse animation cho <p> */
+@keyframes glowPulse {
+  0%, 100% {
+    text-shadow:
+      1px 1px 0 #550055,
+      2px 2px 0 #800080,
+      3px 3px 0 #ff00ff,
+      4px 4px 6px rgba(0,0,0,0.5),
+      0 0 10px rgba(255,255,255,0.6),
+      0 0 20px rgba(200,200,255,0.4);
+  }
+  50% {
+    text-shadow:
+      1px 1px 0 #660066,
+      2px 2px 0 #990099,
+      3px 3px 0 #ff66ff,
+      4px 4px 8px rgba(0,0,0,0.6),
+      0 0 14px rgba(255,255,255,0.7),
+      0 0 28px rgba(220,220,255,0.5);
+  }
+}
+
+/* 🌈 Gradient animation cho <h1> */
+@keyframes textGradientFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* 📦 CONTAINER CHÍNH */
+main {
+  flex: 1;
+  width: 100%;
+  padding: 0 11px;
+}
+
+/* 🧩 DANH SÁCH SẢN PHẨM */
+#products {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  perspective: 1000px;
+}
+
+.card {
+  width: 220px;       /* chiều rộng cố định */
+  height: 330px;      /* chiều cao cố định */
+  background: linear-gradient(160deg, #ffffff, #f5f4ff);
+  border: 2px solid #b785ff;
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow:
+    0 6px 14px rgba(0, 0, 0, 0.15),
+    inset 0 3px 6px rgba(255,255,255,0.5);
+  transform-style: preserve-3d;
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  flex-shrink: 0;      /* không co lại khi container nhỏ */
+}
+
+
+.card:hover {
+  transform: translateY(-8px) rotateX(3deg) rotateY(2deg);
+  border-color: #c99fff;
+}
+
+.card img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  transition: all 0.4s ease;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.card:hover img {
+  transform: scale(1.05);
+}
+
+.card img:active {
+  transform: scale(1.12);
+  box-shadow: 0 0 35px rgba(166, 76, 244, 0.55);
+}
+
+.card h3 {
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.card p {
+  font-size: 13px;
+  color: #555;
+  text-align: center;
+  margin-top: 4px;
+}
+
+/* 🎛️ NHÓM NÚT */
+.card-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+/* 💡 NÚT 3D MỀM MẠI */
+.card-buttons button {
+  flex: 1;
+  max-width: 100px;
+  padding: 8px 14px;
+  font-size: 13px;
+  border-radius: 50px;
+  border: none;
+  background: linear-gradient(145deg, #ff6b6b, #ff4b4b);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow:
+    0 6px 0 #c0392b,
+    0 8px 18px rgba(0,0,0,0.25);
+  transition: background 0.3s ease, transform 0.15s ease, box-shadow 0.25s ease, filter 0.25s ease;
+}
+
+.card-buttons button:hover {
+  background: linear-gradient(145deg, #a4508b, #5f0a87);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 0 #4b006e, 0 10px 20px rgba(0,0,0,0.3);
+}
+
+.card-buttons button:active {
+  background: linear-gradient(145deg, #00c9ff, #92fe9d);
+  transform: translateY(2px) scale(0.96);
+  box-shadow: 0 3px 0 #00b894, 0 6px 12px rgba(0,0,0,0.25);
+  filter: brightness(1.1);
+}
+
+/* 💬 MODAL */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  animation: fadeIn 0.35s ease;
+}
+
+.modal-body {
+  display: flex;
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  width: 340px;
+  box-shadow: 0 12px 25px rgba(0,0,0,0.25);
+  margin: auto;
+  position: relative;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+/* ===== Modal Sửa sản phẩm (Admin) ===== */
+#editModal.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none; /* Hidden by default */
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.35);
+  animation: fadeIn 0.3s;
+}
+/* Show modal when display is set to flex via JS */
+#editModal.modal[style*="display: flex"] {
+  display: flex !important;
+}
+#editModal .detail-close-btn {
+  position: absolute;
+  top: 18px;
+  right: 24px;
+  min-width: 90px;
+  font-size: 1.05em;
+  z-index: 10;
+  background: #ff6b6b;
+  color: #fff;
+  border: none;
+  border-radius: 18px;
+  padding: 6px 18px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+#editModal .detail-close-btn:hover {
+  background: #e74c3c;
+}
+#editModal .modal-body.detail-modal-body {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  padding: 32px 24px;
+  min-width: 700px;
+  max-width: 98vw;
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  animation: fadeInDown 0.3s;
+}
+#editModal .modal-auction-title-black {
+  color: #111;
+  background: none;
+  text-shadow: none;
+  text-align: left;
+  margin-bottom: 18px;
+  font-size: 2.1em;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+#editModal .detail-flexbox-fix {
+  display: flex;
+  flex-direction: row;
+  gap: 32px;
+  align-items: flex-start;
+  margin-top: 18px;
+}
+#editModal .detail-imgbox-fix {
+  width: 340px;
+  min-width: 220px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.10);
+  border: 2px solid #e0e0e0;
+  padding: 16px 10px 16px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
+}
+#editModal .detail-imgbox-fix img#editImg {
+  display: block;
+  margin: 0 auto;
+  width: 260px;
+  height: 220px;
+  border-radius: 12px;
+  object-fit: contain;
+  background: #fff;
+  border: none;
+  box-shadow: 0 2px 8px #e0e0e0;
+}
+#editModal .detail-img-slider {
+  display: flex;
+  gap: 10px;
+  margin: 14px auto 0 auto;
+  justify-content: center;
+  width: 100%;
+  padding: 0 6px;
+}
+#editModal .detail-img-slider img {
+  width: 54px;
+  height: 54px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #ccc;
+  cursor: pointer;
+  background: #fff;
+  transition: border 0.2s;
+}
+#editModal .detail-img-slider img.active {
+  border: 2.5px solid #2a7c2a;
+}
+#editModal .detail-infoarea-fix {
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: flex-start;
+}
+#editModal .detail-ten-fix {
+  font-size: 1.15em;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+#editModal #formEdit input,
+#editModal #formEdit textarea {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+  transition: border-color 0.25s;
+  box-sizing: border-box;
+}
+#editModal #formEdit input:focus,
+#editModal #formEdit textarea:focus {
+  border-color: #a64cf4;
+}
+#editModal #formEdit button[type="submit"] {
+  padding: 8px 18px;
+  border-radius: 50px;
+  border: none;
+  background: linear-gradient(145deg, #ff6b6b, #ff4b4b);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #c0392b, 0 8px 18px rgba(0,0,0,0.18);
+  transition: background 0.3s, transform 0.15s, box-shadow 0.25s, filter 0.25s;
+}
+#editModal #formEdit button[type="submit"]:hover {
+  background: linear-gradient(145deg, #a4508b, #5f0a87);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 0 #4b006e, 0 10px 20px rgba(0,0,0,0.22);
+}
+#editModal #formEdit button[type="submit"]:active {
+  background: linear-gradient(145deg, #00c9ff, #92fe9d);
+  transform: translateY(2px) scale(0.96);
+  box-shadow: 0 3px 0 #00b894, 0 6px 12px rgba(0,0,0,0.18);
+  filter: brightness(1.1);
+}
+#editModal #editImgs img {
+  height: 44px;
+  margin: 2px 4px;
+  border-radius: 6px;
+  border: 1.5px solid #e0e0e0;
+  object-fit: cover;
+}
+@media (max-width: 900px) {
+  #editModal .modal-body.detail-modal-body {
+    min-width: 320px;
+    padding: 18px 4px;
+  }
+  #editModal .detail-flexbox-fix {
+    flex-direction: column;
+    gap: 12px;
+  }
+  #editModal .detail-imgbox-fix {
+    width: 100%;
+    min-width: 0;
+    align-items: center;
+  }
+  #editModal .detail-infoarea-fix {
+    min-width: 0;
+  }
+}
+
+/* ✨ ANIMATION KEYFRAMES */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes shimmerMove {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+
+/* --- FOOTER STYLE --- */
+footer {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0099f7, #00b0ff, #0072ff);
+  background-size: 400% 400%;
+  animation: gradientShift 10s ease infinite;
+  color: #fff;
+  padding: 10px 20px;
+  margin-top: 40px;
+  border-radius: 12px;
+  box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.25), inset 0 2px 6px rgba(255, 255, 255, 0.3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+footer p {
+  text-align: right;
+  font-weight: normal;
+  color: #fff;
+  line-height: 1.4;
+  margin: 0;
+}

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin - Quản lý đấu giá</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <header>
+    <h1>🔧 QUẢN LÝ ĐẤU GIÁ SẢN PHẨM</h1>
+  </header>
+
+  <main>
+    <!-- Phần thiết lập thời gian đấu giá -->
+    <section class="time-settings">
+      <h2>⏰ Thiết lập thời gian đấu giá</h2>
+      <div class="time-form">
+        <div class="form-group">
+          <label>Thời gian bắt đầu:</label>
+          <input type="datetime-local" id="startTime">
+        </div>
+        <div class="form-group">
+          <label>Thời gian kết thúc:</label>
+          <input type="datetime-local" id="endTime">
+        </div>
+        <button id="saveTimeBtn" class="btn-primary">💾 Lưu thời gian</button>
+        <button id="resetTimeBtn" class="btn-secondary">🔄 Reset về mặc định</button>
+      </div>
+      <div class="current-time-display">
+        <p><strong>Thời gian hiện tại:</strong></p>
+        <p>Bắt đầu: <span id="currentStartTime">Chưa thiết lập</span></p>
+        <p>Kết thúc: <span id="currentEndTime">Chưa thiết lập</span></p>
+        <p>Trạng thái: <span id="auctionStatus" class="status-badge">Đang kiểm tra...</span></p>
+      </div>
+    </section>
+
+    <!-- Phần thêm sản phẩm -->
+    <section class="add-product">
+      <h2>➕ Thêm sản phẩm mới</h2>
+      <form id="formAdd">
+        <label>Tên sản phẩm:</label>
+        <input type="text" name="tenProduct" required>
+        
+        <label>Giá khởi điểm:</label>
+        <input type="number" name="giaKhoiDiem" required>
+        
+        <label>Mô tả:</label>
+        <textarea name="moTa" rows="4"></textarea>
+        
+        <label>Hình ảnh (tối đa 4 ảnh):</label>
+        <input type="file" name="hinhAnh" accept="image/*" multiple>
+        
+        <button type="submit" class="btn-primary">Thêm sản phẩm</button>
+      </form>
+    </section>
+
+    <!-- Danh sách sản phẩm -->
+    <section class="product-list">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h2>📋 Danh sách sản phẩm</h2>
+        <div class="export-buttons">
+          <button id="exportExcelBtn" class="btn-success">📊 Xuất Excel</button>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table id="tbl">
+          <thead>
+            <tr>
+              <th>Mã</th>
+              <th>Tên</th>
+              <th>Giá khởi điểm</th>
+              <th>Giá hiện tại</th>
+              <th>Người đấu giá</th>
+              <th>Hình ảnh</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal chỉnh sửa sản phẩm -->
+  <div id="editModal" class="modal" style="display:none;">
+    <div class="modal-body detail-modal-body">
+      <button id="editClose" class="detail-close-btn">Đóng</button>
+      <h2 class="modal-auction-title-black">Chỉnh sửa sản phẩm</h2>
+      
+      <div class="detail-flexbox-fix">
+        <div class="detail-imgbox-fix">
+          <img id="editImg" src="" alt="Hình sản phẩm">
+          <div class="detail-img-slider" id="editImgSlider"></div>
+        </div>
+        
+        <div class="detail-infoarea-fix">
+          <form id="formEdit">
+            <input type="hidden" id="editId">
+            
+            <label>Tên sản phẩm:</label>
+            <input type="text" id="editTen" required>
+            
+            <label>Giá khởi điểm:</label>
+            <input type="number" id="editGiaKhoiDiem" step="0.01" required>
+            
+            <label>💰 Giá hiện tại:</label>
+            <input type="number" id="editGiaHienTai" step="0.01" placeholder="Để trống nếu chưa có người đấu giá">
+            <small style="color: #666; display: block; margin-top: 5px;">
+              ⚠️ Chỉ nhập nếu muốn thay đổi giá hiện tại
+            </small>
+            
+            <label>👤 Người đấu giá hiện tại:</label>
+            <input type="text" id="editTenNguoiDauGia" placeholder="Tên người đấu giá">
+            <small style="color: #666; display: block; margin-top: 5px;">
+              ⚠️ Để trống nếu muốn xóa người đấu giá
+            </small>
+            
+            <label>Mô tả:</label>
+            <textarea id="editMoTa" rows="4"></textarea>
+            
+            <label>Hình ảnh mới (tối đa 4 ảnh):</label>
+            <input type="file" id="editHinhAnh" accept="image/*" multiple>
+            <small style="color: #666; display: block; margin-top: 5px;">
+              ℹ️ Chỉ chọn nếu muốn thay đổi hình ảnh
+            </small>
+            
+            <button type="submit">💾 Lưu thay đổi</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
