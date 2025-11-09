@@ -301,36 +301,19 @@ app.get('/api/bid-detail/:id', async (req, res) => {
 
 // ========== HÀM HELPER XỬ LÝ THỜI GIAN VIỆT NAM ==========
 
-// Chuyển đổi Date sang múi giờ Việt Nam (UTC+7)
-function toVietnamTime(date) {
-  if (!(date instanceof Date)) {
-    date = new Date(date);
-  }
-  
-  // Lấy timestamp UTC
-  const utcTime = date.getTime();
-  
-  // Thêm 7 giờ (25200000 milliseconds = 7 * 60 * 60 * 1000)
-  const vietnamTime = new Date(utcTime + (7 * 60 * 60 * 1000));
-  
-  return vietnamTime;
-}
-
-// Format datetime cho SQL Server: YYYY-MM-DD HH:mm:ss
+// Format datetime cho SQL Server: YYYY-MM-DD HH:mm:ss (dùng local time)
 function formatDateTimeForDB(date) {
   if (!(date instanceof Date)) {
     date = new Date(date);
   }
   
-  // Chuyển sang giờ Việt Nam
-  const vnDate = toVietnamTime(date);
-  
-  const year = vnDate.getUTCFullYear();
-  const month = String(vnDate.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(vnDate.getUTCDate()).padStart(2, '0');
-  const hours = String(vnDate.getUTCHours()).padStart(2, '0');
-  const minutes = String(vnDate.getUTCMinutes()).padStart(2, '0');
-  const seconds = String(vnDate.getUTCSeconds()).padStart(2, '0');
+  // Dùng local time (máy đã set UTC+7)
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
   
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
