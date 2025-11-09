@@ -277,11 +277,15 @@ document.getElementById('bidOk').onclick = async () => {
 function formatVietnameseDateTime(dateStr) {
   if (!dateStr) return '-';
   
+  console.log('DEBUG formatVietnameseDateTime input:', dateStr);
+  
   try {
     // SQL Server trả về: "2025-11-09 21:45:25" (đã là giờ local VN)
     // Parse trực tiếp từ string thay vì dùng Date() để tránh timezone conversion
     
     const parts = dateStr.split(/[\s-:]/); // Split by space, dash, colon
+    console.log('DEBUG parts:', parts);
+    
     if (parts.length >= 6) {
       // parts: [year, month, day, hour, minute, second]
       const year = parts[0];
@@ -291,7 +295,9 @@ function formatVietnameseDateTime(dateStr) {
       const minutes = parts[4].padStart(2, '0');
       const seconds = parts[5].padStart(2, '0');
       
-      return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+      const result = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+      console.log('DEBUG result:', result);
+      return result;
     }
     
     // Fallback: nếu format khác, parse như cũ
