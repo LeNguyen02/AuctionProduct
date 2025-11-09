@@ -1,9 +1,0 @@
-✅ Server running on http://localhost:\\.\pipe\786634d2-128a-433e-8319-0e0fb2317987
-✅ Connected to SQL Server
-Client connected: f7BkHYIDAs0QAHK5AAAB
-=== BID TIME DEBUG ===
-Current time (local): Sun Nov 09 2025 21:45:25 GMT+0700 (Indochina Time)
-Formatted for DB: 2025-11-09 21:45:25
-=====================
-Client connected: FBspIkETonE0vWAqAAAD
-Client connected: Qs2-rnoUR6pvmxJ7AAAF

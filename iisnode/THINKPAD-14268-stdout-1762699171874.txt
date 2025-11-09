@@ -1,8 +1,0 @@
-✅ Server running on http://localhost:\\.\pipe\8d8b4d85-aa8e-4930-bde5-ffb17b6a8270
-Client connected: vtUvA3AKgYSYWo-OAAAB
-✅ Connected to SQL Server
-Client connected: 3F1_uDPO2hwGdUYCAAAD
-Client connected: XstM_hhGiHTpUylLAAAF
-Current time (UTC): 2025-11-09T14:39:54.806Z
-Vietnam time (UTC+7): 2025-11-09 21:39:54
-Client disconnected: XstM_hhGiHTpUylLAAAF
