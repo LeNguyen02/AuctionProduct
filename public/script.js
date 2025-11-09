@@ -273,31 +273,30 @@ document.getElementById('bidOk').onclick = async () => {
   }
 };
 
-// ✅ Hàm format thời gian Việt Nam - FIXED
+// ✅ Hàm format thời gian Việt Nam - FIXED V2
 function formatVietnameseDateTime(dateStr) {
   if (!dateStr) return '-';
   
-  console.log('DEBUG formatVietnameseDateTime input:', dateStr);
-  
   try {
-    // SQL Server trả về: "2025-11-09 21:45:25" (đã là giờ local VN)
-    // Parse trực tiếp từ string thay vì dùng Date() để tránh timezone conversion
+    // Server trả về: "2025-11-09 21:45:25" (string format từ SQL CONVERT)
+    // Parse trực tiếp từ string
     
-    const parts = dateStr.split(/[\s-:]/); // Split by space, dash, colon
-    console.log('DEBUG parts:', parts);
+    // Remove milliseconds and timezone if present (e.g., .000Z)
+    let cleanStr = dateStr.replace(/\.\d+Z?$/, '');
+    
+    // Split by space, dash, colon, and T
+    const parts = cleanStr.split(/[\sT-:]/);
     
     if (parts.length >= 6) {
       // parts: [year, month, day, hour, minute, second]
-      const year = parts[0];
-      const month = parts[1].padStart(2, '0');
       const day = parts[2].padStart(2, '0');
+      const month = parts[1].padStart(2, '0');
+      const year = parts[0];
       const hours = parts[3].padStart(2, '0');
       const minutes = parts[4].padStart(2, '0');
       const seconds = parts[5].padStart(2, '0');
       
-      const result = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
-      console.log('DEBUG result:', result);
-      return result;
+      return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
     }
     
     // Fallback: nếu format khác, parse như cũ

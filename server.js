@@ -285,10 +285,19 @@ app.get('/api/bid-detail/:id', async (req, res) => {
       .query('SELECT MaProduct, TenProduct, GiaKhoiDiem, GiaHienTai, TenNguoiDauGia, HinhAnh, GhiChu, MoTa FROM Product WHERE MaProduct = @id');
     if (!prodQ.recordset.length) return res.status(404).send('Product not found');
     const product = prodQ.recordset[0];
-    // Lấy tất cả lượt đấu giá (mới nhất lên đầu)
+    // Lấy tất cả lượt đấu giá (mới nhất lên đầu) - format CreatedAt as string
     const bidsQ = await pool.request()
       .input('id', sql.Int, id)
-      .query('SELECT TenNguoiDauGia, GiaHienTai, Note, CreatedAt FROM Daugia WHERE MaProduct = @id ORDER BY CreatedAt DESC');
+      .query(`
+        SELECT 
+          TenNguoiDauGia, 
+          GiaHienTai, 
+          Note, 
+          CONVERT(VARCHAR(20), CreatedAt, 120) AS CreatedAt
+        FROM Daugia 
+        WHERE MaProduct = @id 
+        ORDER BY CreatedAt DESC
+      `);
     res.json({
       product,
       bids: bidsQ.recordset
