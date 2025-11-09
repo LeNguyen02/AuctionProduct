@@ -386,15 +386,15 @@ app.post('/api/bid', async (req, res) => {
         WHERE MaProduct = @maProduct
       `);
     
-    // Thêm vào BidHistory với thời gian Việt Nam
+    // Thêm vào bảng Daugia với thời gian Việt Nam
     await pool.request()
       .input('maProduct', maProduct)
       .input('tenNguoiDauGia', tenNguoiDauGia)
       .input('giaHienTai', giaHienTai)
       .input('createdAt', vietnamTime)
       .query(`
-        INSERT INTO BidHistory (MaProduct, TenNguoiDauGia, GiaHienTai, CreatedAt)
-        VALUES (@maProduct, @tenNguoiDauGia, @giaHienTai, @createdAt)
+        INSERT INTO Daugia (MaProduct, TenNguoiDauGia, GiaHienTai, CreatedAt, Note)
+        VALUES (@maProduct, @tenNguoiDauGia, @giaHienTai, @createdAt, N'Đấu giá')
       `);
     
     // Emit socket event
