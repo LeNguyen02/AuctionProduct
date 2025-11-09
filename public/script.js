@@ -285,7 +285,7 @@ function formatVietnameseDateTime(dateStr) {
     let cleanStr = dateStr.replace(/\.\d+Z?$/, '');
     
     // Split by space, dash, colon, and T
-    const parts = cleanStr.split(/[\sT-:]/);
+    const parts = cleanStr.split(/[\sT\-:]/);
     
     if (parts.length >= 6) {
       // parts: [year, month, day, hour, minute, second]
